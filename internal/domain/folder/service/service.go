@@ -1,0 +1,93 @@
+package service
+
+import (
+	"fmt"
+	"os"
+	"storage-service/internal/domain/folder/model"
+	"storage-service/internal/domain/folder/storage"
+)
+
+const (
+	storageRoot = "./storage"
+)
+
+type folderService struct {
+	storage storage.FolderStorage
+}
+
+func NewFolderService(storage storage.FolderStorage) *folderService {
+	return &folderService{
+		storage: storage,
+	}
+}
+
+func getUserRoot(userId int64) string {
+	return fmt.Sprintf("%s/user_%d/", storageRoot, userId)
+}
+
+func (s *folderService) ensureUserRootFolder(userId int64) (string, error) {
+	folderName := getUserRoot(userId)
+	if _, err := os.Stat(folderName); os.IsNotExist(err) {
+		err = os.Mkdir(folderName, 0666)
+		if err != nil {
+			return "", err
+		}
+	}
+
+	return folderName, nil
+}
+
+func (s *folderService) AddFolder(dto *model.FolderAddDTO) (*model.FolderDTO, error) {
+	root, err := s.ensureUserRootFolder(dto.UserId)
+	if err != nil {
+		return nil, err
+	}
+	result, _ := s.storage.GetFolderByName(&model.FolderGetDTO{FolderName: dto.FolderName, UserId: dto.UserId})
+	if result != nil {
+		return nil, fmt.Errorf("this folder already exists")
+	}
+
+	err = os.Mkdir(root + dto.FolderName, 0666)
+	if err != nil {
+		return nil, err
+	}
+	return s.storage.AddFolder(dto)
+}
+
+func (s *folderService) DeleteFolder(dto *model.FolderDeleteDTO) (*model.FolderDeleteResponse, error) {
+	result, err := s.storage.GetFolderById(&model.FolderGetDTO{Id: dto.Id})
+	if result == nil {
+		return nil, fmt.Errorf("no such folder")
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	root := getUserRoot(dto.UserId)
+	err = os.RemoveAll(root + result.FolderName)
+	if err != nil {
+		return nil, err
+	}
+	return s.storage.DeleteFolder(dto)
+}
+
+func (s *folderService) RenameFolder(dto *model.FolderRenameDTO) (*model.FolderDTO, error) {
+	result, err := s.storage.GetFolderById(&model.FolderGetDTO{Id: dto.Id})
+	if result == nil {
+		return nil, fmt.Errorf("no such folder")
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	root := getUserRoot(dto.UserId)
+	err = os.Rename(root+result.FolderName, root+dto.NewName)
+	if err != nil {
+		return nil, err
+	}
+	return s.storage.RenameFolder(dto)
+}
+
+func (s *folderService) GetFolder(dto *model.FolderRenameDTO) (*model.FolderDTO, error) {
+	return s.storage.GetFolderById(&model.FolderGetDTO{Id: dto.Id})
+}
