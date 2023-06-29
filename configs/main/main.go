@@ -6,7 +6,8 @@ type mainConfig struct {
 	ipAddr      string
 	filePort    string
 	folderPort  string
-	serviceName string
+	folderServiceName string
+	fileServiceName string
 }
 
 func GetMainConfig() *mainConfig {
@@ -14,7 +15,8 @@ func GetMainConfig() *mainConfig {
 		ipAddr:      "127.0.0.1",
 		filePort:    "8080",
 		folderPort:  "8000",
-		serviceName: "StorageGrpcServer",
+		folderServiceName: "FolderGrpcService",
+		fileServiceName: "FileGrpcService",
 	}
 	ip := os.Getenv("SERVICE_IP")
 	if ip != "" {
@@ -28,9 +30,13 @@ func GetMainConfig() *mainConfig {
 	if ip != "" {
 		conf.folderPort = folderPort
 	}
-	serviceName := os.Getenv("SERVICE_NAME")
+	folderServiceName := os.Getenv("FOLDER_SERVICE_NAME")
 	if ip != "" {
-		conf.serviceName = serviceName
+		conf.folderServiceName = folderServiceName
+	}
+	fileServiceName := os.Getenv("FILE_SERVICE_NAME")
+	if ip != "" {
+		conf.fileServiceName = fileServiceName
 	}
 	return conf
 }
@@ -47,6 +53,10 @@ func (cnf *mainConfig) GetFolderPort() string {
 	return cnf.folderPort
 }
 
-func (cnf *mainConfig) GetServiceName() string {
-	return cnf.serviceName
+func (cnf *mainConfig) GetFolderServiceName() string {
+	return cnf.folderServiceName
+}
+
+func (cnf *mainConfig) GetFileServiceName() string {
+	return cnf.fileServiceName
 }
