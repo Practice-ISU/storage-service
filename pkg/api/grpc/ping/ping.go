@@ -6,9 +6,7 @@ import (
 	"time"
 
 	// "net"
-	main_conf "storage-service/configs/grpc/main"
-	ping_conf "storage-service/configs/grpc/ping"
-	reg_conf "storage-service/configs/grpc/registration"
+	// main_conf "storage-service/configs/grpc/main"
 
 	"storage-service/pkg/grpc/discovery/ping"
 	"storage-service/pkg/grpc/discovery/registration"
@@ -16,44 +14,60 @@ import (
 	"google.golang.org/grpc"
 )
 
-type ServiceConfig interface {
-	GetPort() string
-	GetServiceName() string
+type service struct {
+	Addr string
+	Name string
 }
 
-type DiscoveryPingServer struct {
+type discoveryConfig interface {
+	GetDiscoveryAddr() string
+	GetPingPort() string
+}
+
+type serviceConfig interface {
+	GetFilePort() string
+	GetFolderPort() string
+
+	GetIp() string
+
+	GetFolderServiceName() string
+	GetFileServiceName() string
+}
+
+type discoveryPingServer struct {
 	ping.UnimplementedDiscoveryPingServer
-	serviceName  string
 	pingPort     string
-	servicePort  string
 	ip           string
+	services     []service
 	register     registration.ServiceRegistrationClient
 	lastCallTime time.Time
 }
 
-func NewDiscoveryPingServer(cnfPing *ping_conf.Config, cnfReg *reg_conf.Config, cnfMain *main_conf.MainConfig, cnfService ServiceConfig) (*DiscoveryPingServer, error) {
-	fmt.Println("Discovery chanel = " + cnfReg.DiscoveryAddr)
+func NewDiscoveryPingServer(discoveryCnf discoveryConfig, cnfService serviceConfig) (*discoveryPingServer, error) {
+	fmt.Println("Discovery chanel = " + discoveryCnf.GetDiscoveryAddr())
 	options := []grpc.DialOption{
 		grpc.WithInsecure(),
 	}
-	conn, err := grpc.Dial(cnfReg.DiscoveryAddr, options...)
+	conn, err := grpc.Dial(discoveryCnf.GetDiscoveryAddr(), options...)
 	if err != nil {
 		return nil, err
 	}
 	register := registration.NewServiceRegistrationClient(conn)
-	serviceName := cnfService.GetServiceName()
-	servicePort := cnfService.GetPort()
 
-	return &DiscoveryPingServer{
-		register:    register,
-		serviceName: serviceName,
-		pingPort:    cnfPing.Port,
-		servicePort: servicePort,
-		ip:          cnfMain.IpAddr,
+	// folderPort := cnfService.GetFolderPort()
+
+	return &discoveryPingServer{
+		register: register,
+		pingPort: discoveryCnf.GetPingPort(),
+		services: []service{
+			{Addr: cnfService.GetIp() + ":" + cnfService.GetFilePort(), Name: cnfService.GetFileServiceName()},
+			{Addr: cnfService.GetIp() + ":" + cnfService.GetFolderPort(), Name: cnfService.GetFolderServiceName()},
+		},
+		ip: cnfService.GetIp(),
 	}, nil
 }
 
-func (s *DiscoveryPingServer) Ping(context.Context, *ping.PingRequest) (*ping.PingResponse, error) {
+func (s *discoveryPingServer) Ping(context.Context, *ping.PingRequest) (*ping.PingResponse, error) {
 	s.lastCallTime = time.Now()
 	// fmt.Println("Pinged in", s.lastCallTime.String())
 	return &ping.PingResponse{
@@ -62,32 +76,45 @@ func (s *DiscoveryPingServer) Ping(context.Context, *ping.PingRequest) (*ping.Pi
 	}, nil
 }
 
-func (s *DiscoveryPingServer) SendRegistrationRequest() {
+func (s *discoveryPingServer) SendRegistrationRequest() {
 	for {
-		data := &registration.ServiceRequest{
-			Timestamp:   time.Now().Format("2006-01-02 15:04:05.000"),
-			ServiceName: s.serviceName,
-			Channel:     "http://" + s.ip + ":" + s.servicePort,
-			ChannelPing: "http://" + s.ip + ":" + s.pingPort,
-		}
-		result, err := s.register.Registration(context.TODO(), data)
+		datas := make([]registration.ServiceRequest, len(s.services))
+		flag := true
 
-		if err != nil {
-			fmt.Println(err.Error())
+		for i, service := range s.services {
+			datas[i] = registration.ServiceRequest{
+				Timestamp:   time.Now().Format("2006-01-02 15:04:05.000"),
+				ServiceName: service.Name,
+				Channel:     "http://" + service.Addr,
+				ChannelPing: "http://" + s.ip + ":" + s.pingPort,
+			}
+
+			result, err := s.register.Registration(context.TODO(), &datas[i])
+			if err != nil {
+				fmt.Println(err.Error())
+				flag = false
+				break
+			}
+			if result.Success {
+				fmt.Println(service.Name+" registered in", result.Timestamp, "success -", result.Success)
+			} else {
+				fmt.Println("Error for", datas[i].ServiceName)
+				flag = false
+				break
+			}
+		}
+
+		if flag {
 			break
 		}
 
-		if result.Success {
-			fmt.Println("registered in", result.Timestamp, "success -", result.Success)
-			break
-		}
 		time.Sleep(time.Minute)
 	}
 }
 
-func (s *DiscoveryPingServer) StartTimeout(f func()) {
-	time.AfterFunc(6 * time.Minute, func() {
-		if time.Since(s.lastCallTime) > 6 * time.Minute {
+func (s *discoveryPingServer) StartTimeout(f func()) {
+	time.AfterFunc(6*time.Minute, func() {
+		if time.Since(s.lastCallTime) > 6*time.Minute {
 			fmt.Println("Lost ping from discovery-service!")
 			f()
 		}
