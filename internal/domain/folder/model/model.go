@@ -18,7 +18,7 @@ func (dto *FolderAddDTO) ExtractInsertSQL() string {
 }
 
 type FolderDeleteDTO struct {
-	Id int64
+	Id     int64
 	UserId int64
 }
 
@@ -28,21 +28,28 @@ func (dto *FolderDeleteDTO) ExtractDeleteSQL() string {
 
 type FolderDeleteResponse struct {
 	Success bool
-	Mess string
+	Mess    string
 }
 
 type FolderRenameDTO struct {
-	Id int64
+	Id      int64
 	NewName string
-	UserId int64
+	UserId  int64
 }
 
 func (dto *FolderRenameDTO) ExtractRenameSQL() string {
 	return fmt.Sprintf("id = %d", dto.Id)
 }
 
-type FolderGetDTO struct {
+type FolderGetByIdDTO struct {
 	Id int64
+}
+
+type FolderGetByNameDTO struct {
 	FolderName string
+	UserId int64
+}
+
+type FolderGetAllDTO struct	{
 	UserId int64
 }

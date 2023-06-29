@@ -7,8 +7,10 @@ import (
 type FolderStorage interface {
 	AddFolder(dto *model.FolderAddDTO) (*model.FolderDTO, error)
 	DeleteFolder(dto *model.FolderDeleteDTO) (*model.FolderDeleteResponse, error)
-	GetAllFolders(userId int64) (*[]model.FolderDTO, error)
-	GetFolderById(dto *model.FolderGetDTO) (*model.FolderDTO, error)
-	GetFolderByName(dto *model.FolderGetDTO) (*model.FolderDTO, error)
+	GetAllFolders(dto *model.FolderGetAllDTO) (*[]model.FolderDTO, error)
+	GetFolderById(dto *model.FolderGetByIdDTO) (*model.FolderDTO, error)
+	GetFolderByName(dto *model.FolderGetByNameDTO) (*model.FolderDTO, error)
 	RenameFolder(dto *model.FolderRenameDTO) (*model.FolderDTO, error)
+
+
 }

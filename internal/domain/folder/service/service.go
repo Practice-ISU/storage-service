@@ -42,12 +42,12 @@ func (s *folderService) AddFolder(dto *model.FolderAddDTO) (*model.FolderDTO, er
 	if err != nil {
 		return nil, err
 	}
-	result, _ := s.storage.GetFolderByName(&model.FolderGetDTO{FolderName: dto.FolderName, UserId: dto.UserId})
+	result, _ := s.storage.GetFolderByName(&model.FolderGetByNameDTO{FolderName: dto.FolderName, UserId: dto.UserId})
 	if result != nil {
 		return nil, fmt.Errorf("this folder already exists")
 	}
 
-	err = os.Mkdir(root + dto.FolderName, 0666)
+	err = os.Mkdir(root+dto.FolderName, 0666)
 	if err != nil {
 		return nil, err
 	}
@@ -55,7 +55,7 @@ func (s *folderService) AddFolder(dto *model.FolderAddDTO) (*model.FolderDTO, er
 }
 
 func (s *folderService) DeleteFolder(dto *model.FolderDeleteDTO) (*model.FolderDeleteResponse, error) {
-	result, err := s.storage.GetFolderById(&model.FolderGetDTO{Id: dto.Id})
+	result, err := s.storage.GetFolderById(&model.FolderGetByIdDTO{Id: dto.Id})
 	if result == nil {
 		return nil, fmt.Errorf("no such folder")
 	}
@@ -72,7 +72,7 @@ func (s *folderService) DeleteFolder(dto *model.FolderDeleteDTO) (*model.FolderD
 }
 
 func (s *folderService) RenameFolder(dto *model.FolderRenameDTO) (*model.FolderDTO, error) {
-	result, err := s.storage.GetFolderById(&model.FolderGetDTO{Id: dto.Id})
+	result, err := s.storage.GetFolderById(&model.FolderGetByIdDTO{Id: dto.Id})
 	if result == nil {
 		return nil, fmt.Errorf("no such folder")
 	}
@@ -88,6 +88,19 @@ func (s *folderService) RenameFolder(dto *model.FolderRenameDTO) (*model.FolderD
 	return s.storage.RenameFolder(dto)
 }
 
-func (s *folderService) GetFolder(dto *model.FolderRenameDTO) (*model.FolderDTO, error) {
-	return s.storage.GetFolderById(&model.FolderGetDTO{Id: dto.Id})
+func (s *folderService) GetUrl(dto *model.FolderGetByIdDTO) (string, error) {
+	folder, err := s.storage.GetFolderById(dto)
+	if err != nil {
+		return "", nil
+	}
+	url := getUserRoot(folder.UserId)
+	return url + folder.FolderName + "/", nil
+}
+
+func (s *folderService) GetFolder(dto *model.FolderGetByIdDTO) (*model.FolderDTO, error) {
+	return s.storage.GetFolderById(dto)
+}
+
+func (s *folderService) GetAllFolders(dto *model.FolderGetAllDTO) (*[]model.FolderDTO, error) {
+	return s.storage.GetAllFolders(dto)
 }
