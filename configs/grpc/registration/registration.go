@@ -9,7 +9,7 @@ type Config struct {
 
 func GetConfig() *Config {
 	conf := &Config{
-		ServiceName:   "UserGrpcService",
+		ServiceName:   "StorageGrpcService",
 		DiscoveryAddr: "158.160.26.1:80",
 	}
 	serviceName := os.Getenv("SERVICE_NAME")

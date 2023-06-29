@@ -13,13 +13,15 @@ type Config struct {
 
 func GetConfig() *Config {
 	cnf := &Config{
-		Host:     "localhost",
-		Port:     "5432",
-		DBname:   "storage_db",
+		Host:   "localhost",
+		Port:   "5432",
+		DBname: "storage_db",
 		Username: "supervisor",
+		// Username: "postgres",
 		Password: "qwer",
 		SSL:      "disable",
 	}
+
 	host := os.Getenv("POSTGRES_HOST")
 	if host != "" {
 		cnf.Host = host
@@ -36,10 +38,10 @@ func GetConfig() *Config {
 	if user != "" {
 		cnf.Username = user
 	}
-	pass := os.Getenv("POSTGRES_PASSWORD")
-	if pass != "" {
-		cnf.Password = pass
-	}
+	// pass := os.Getenv("POSTGRES_PASSWORD")
+	// if pass != "" {
+	// 	cnf.Password = pass
+	// }
 	sslMode := os.Getenv("POSTGRES_SSL_MODE")
 	if sslMode != "" {
 		cnf.SSL = sslMode
