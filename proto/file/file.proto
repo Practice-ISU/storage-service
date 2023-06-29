@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package fileservice;
+package file_service;
 
 option go_package = "storage-service/pkg/grpc/file";
 
