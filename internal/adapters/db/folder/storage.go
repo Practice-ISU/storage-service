@@ -35,7 +35,6 @@ func (s *folderStorage) getFolderWithWhereCase(whereCase string) (*model.FolderD
 	if whereCase != "" {
 		stmt += " WHERE " + whereCase
 	}
-	stmt += " LIMIT 1"
 
 	db, err := s.psqlClient.GetDb()
 	if err != nil {
@@ -71,7 +70,7 @@ func (s *folderStorage) AddFolder(dto *model.FolderAddDTO) (*model.FolderDTO, er
 	}, nil
 }
 func (s *folderStorage) DeleteFolder(dto *model.FolderDeleteDTO) (*model.FolderDeleteResponse, error) {
-	stmt := fmt.Sprintf("DELETE FROM folders WHERE id = %d LIMIT 1", dto.Id)
+	stmt := fmt.Sprintf("DELETE FROM folders WHERE id = %d; DELETE FROM files WHERE folder_id = %d", dto.Id, dto.Id)
 	db, err := s.psqlClient.GetDb()
 	if err != nil {
 		return &model.FolderDeleteResponse{
@@ -87,7 +86,7 @@ func (s *folderStorage) DeleteFolder(dto *model.FolderDeleteDTO) (*model.FolderD
 		return &model.FolderDeleteResponse{
 			Success: false,
 			Mess:    err.Error(),
-		}, nil
+		}, err
 	}
 	return &model.FolderDeleteResponse{
 		Success: true,
@@ -95,30 +94,50 @@ func (s *folderStorage) DeleteFolder(dto *model.FolderDeleteDTO) (*model.FolderD
 	}, nil
 }
 func (s *folderStorage) RenameFolder(dto *model.FolderRenameDTO) (*model.FolderDTO, error) {
-	stmt := fmt.Sprintf("UPDATE folders SET folder_name = %s'' WHERE id = %d LIMIT 1", dto.NewName, dto.Id)
+	stmt := fmt.Sprintf("UPDATE folders SET folder_name = '%s' WHERE id = %d", dto.NewName, dto.Id)
+
 	db, err := s.psqlClient.GetDb()
 	if err != nil {
 		return nil, err
 	}
 	defer db.Close()
 
-	_, err = db.Exec(stmt + "RETURNING id;")
+	_, err = db.Exec(stmt)
 
 	if err != nil {
 		return nil, err
 	}
-	// return &model.FolderDTO{
 
-	// }
-	return nil, nil
+	return s.GetFolderById(&model.FolderGetByIdDTO{Id: dto.Id})
 }
 
-func (s *folderStorage) GetFolderById(dto *model.FolderGetDTO) (*model.FolderDTO, error) {
-	return s.getFolderWithWhereCase(fmt.Sprintf(`id = %d AND user_id = %d`, dto.Id, dto.UserId))
+func (s *folderStorage) GetFolderById(dto *model.FolderGetByIdDTO) (*model.FolderDTO, error) {
+	return s.getFolderWithWhereCase(fmt.Sprintf(`id = %d`, dto.Id))
 }
-func (s *folderStorage) GetFolderByName(dto *model.FolderGetDTO) (*model.FolderDTO, error) {
+func (s *folderStorage) GetFolderByName(dto *model.FolderGetByNameDTO) (*model.FolderDTO, error) {
 	return s.getFolderWithWhereCase(fmt.Sprintf(`folder_name = '%s' AND user_id = %d`, dto.FolderName, dto.UserId))
 }
-func (s *folderStorage) GetAllFolders(userId int64) (*[]model.FolderDTO, error) {
-	return nil, nil
+
+func (s *folderStorage) GetAllFolders(dto *model.FolderGetAllDTO) (*[]model.FolderDTO, error) {
+	stmt := fmt.Sprintf("SELECT id, user_id, folder_name FROM folders WHERE user_id = %d", dto.UserId)
+	db, err := s.psqlClient.GetDb()
+	if err != nil {
+		return nil, err
+	}
+	defer db.Close()
+
+	result, err := db.Query(stmt)
+	if err != nil {
+		return nil, err
+	}
+	folders := []model.FolderDTO{}
+	for result.Next() {
+		folder, err := scanFolder(result)
+		if err != nil {
+			return nil, err
+		}
+		folders = append(folders, *folder)
+	}
+	return &folders, nil
+
 }
