@@ -24,8 +24,9 @@ const _ = grpc.SupportPackageIsVersion7
 type FolderServiceClient interface {
 	AddFolder(ctx context.Context, in *FolderAddDTO, opts ...grpc.CallOption) (*FolderResponse, error)
 	DeleteFolder(ctx context.Context, in *FolderDeleteDTO, opts ...grpc.CallOption) (*Details, error)
-	GetFolder(ctx context.Context, in *FolderGetDTO, opts ...grpc.CallOption) (*FolderResponse, error)
 	RenameFolder(ctx context.Context, in *FolderRenameDTO, opts ...grpc.CallOption) (*FolderResponse, error)
+	GetFolder(ctx context.Context, in *FolderGetDTO, opts ...grpc.CallOption) (*FolderResponse, error)
+	GetAllFolders(ctx context.Context, in *UserId, opts ...grpc.CallOption) (*AllFoldersResponse, error)
 }
 
 type folderServiceClient struct {
@@ -54,6 +55,15 @@ func (c *folderServiceClient) DeleteFolder(ctx context.Context, in *FolderDelete
 	return out, nil
 }
 
+func (c *folderServiceClient) RenameFolder(ctx context.Context, in *FolderRenameDTO, opts ...grpc.CallOption) (*FolderResponse, error) {
+	out := new(FolderResponse)
+	err := c.cc.Invoke(ctx, "/folderservice.FolderService/RenameFolder", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *folderServiceClient) GetFolder(ctx context.Context, in *FolderGetDTO, opts ...grpc.CallOption) (*FolderResponse, error) {
 	out := new(FolderResponse)
 	err := c.cc.Invoke(ctx, "/folderservice.FolderService/GetFolder", in, out, opts...)
@@ -63,9 +73,9 @@ func (c *folderServiceClient) GetFolder(ctx context.Context, in *FolderGetDTO, o
 	return out, nil
 }
 
-func (c *folderServiceClient) RenameFolder(ctx context.Context, in *FolderRenameDTO, opts ...grpc.CallOption) (*FolderResponse, error) {
-	out := new(FolderResponse)
-	err := c.cc.Invoke(ctx, "/folderservice.FolderService/RenameFolder", in, out, opts...)
+func (c *folderServiceClient) GetAllFolders(ctx context.Context, in *UserId, opts ...grpc.CallOption) (*AllFoldersResponse, error) {
+	out := new(AllFoldersResponse)
+	err := c.cc.Invoke(ctx, "/folderservice.FolderService/GetAllFolders", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -78,8 +88,9 @@ func (c *folderServiceClient) RenameFolder(ctx context.Context, in *FolderRename
 type FolderServiceServer interface {
 	AddFolder(context.Context, *FolderAddDTO) (*FolderResponse, error)
 	DeleteFolder(context.Context, *FolderDeleteDTO) (*Details, error)
-	GetFolder(context.Context, *FolderGetDTO) (*FolderResponse, error)
 	RenameFolder(context.Context, *FolderRenameDTO) (*FolderResponse, error)
+	GetFolder(context.Context, *FolderGetDTO) (*FolderResponse, error)
+	GetAllFolders(context.Context, *UserId) (*AllFoldersResponse, error)
 	mustEmbedUnimplementedFolderServiceServer()
 }
 
@@ -93,11 +104,14 @@ func (UnimplementedFolderServiceServer) AddFolder(context.Context, *FolderAddDTO
 func (UnimplementedFolderServiceServer) DeleteFolder(context.Context, *FolderDeleteDTO) (*Details, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteFolder not implemented")
 }
+func (UnimplementedFolderServiceServer) RenameFolder(context.Context, *FolderRenameDTO) (*FolderResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RenameFolder not implemented")
+}
 func (UnimplementedFolderServiceServer) GetFolder(context.Context, *FolderGetDTO) (*FolderResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetFolder not implemented")
 }
-func (UnimplementedFolderServiceServer) RenameFolder(context.Context, *FolderRenameDTO) (*FolderResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method RenameFolder not implemented")
+func (UnimplementedFolderServiceServer) GetAllFolders(context.Context, *UserId) (*AllFoldersResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetAllFolders not implemented")
 }
 func (UnimplementedFolderServiceServer) mustEmbedUnimplementedFolderServiceServer() {}
 
@@ -148,6 +162,24 @@ func _FolderService_DeleteFolder_Handler(srv interface{}, ctx context.Context, d
 	return interceptor(ctx, in, info, handler)
 }
 
+func _FolderService_RenameFolder_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(FolderRenameDTO)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FolderServiceServer).RenameFolder(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/folderservice.FolderService/RenameFolder",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FolderServiceServer).RenameFolder(ctx, req.(*FolderRenameDTO))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _FolderService_GetFolder_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(FolderGetDTO)
 	if err := dec(in); err != nil {
@@ -166,20 +198,20 @@ func _FolderService_GetFolder_Handler(srv interface{}, ctx context.Context, dec 
 	return interceptor(ctx, in, info, handler)
 }
 
-func _FolderService_RenameFolder_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(FolderRenameDTO)
+func _FolderService_GetAllFolders_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UserId)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(FolderServiceServer).RenameFolder(ctx, in)
+		return srv.(FolderServiceServer).GetAllFolders(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/folderservice.FolderService/RenameFolder",
+		FullMethod: "/folderservice.FolderService/GetAllFolders",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(FolderServiceServer).RenameFolder(ctx, req.(*FolderRenameDTO))
+		return srv.(FolderServiceServer).GetAllFolders(ctx, req.(*UserId))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -200,12 +232,16 @@ var FolderService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _FolderService_DeleteFolder_Handler,
 		},
 		{
+			MethodName: "RenameFolder",
+			Handler:    _FolderService_RenameFolder_Handler,
+		},
+		{
 			MethodName: "GetFolder",
 			Handler:    _FolderService_GetFolder_Handler,
 		},
 		{
-			MethodName: "RenameFolder",
-			Handler:    _FolderService_RenameFolder_Handler,
+			MethodName: "GetAllFolders",
+			Handler:    _FolderService_GetAllFolders_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
