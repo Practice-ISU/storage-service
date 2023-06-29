@@ -5,11 +5,11 @@ import (
 )
 
 type FileStorage interface {
-	AddFile(filename string, folderId int64) (*model.FileDTO, error)
-	DeleteFile(fileId int64) (*model.FileDeleteResponceDTO, error)
-	RenameFile(fileId int64, newFileName string) (*model.FileDTO, error)
+	AddFile(dto *model.FileAddDTO) (*model.FileDTO, error)
+	DeleteFile(dto *model.FileDeleteDTO) (*model.FileDeleteResponceDTO, error)
+	RenameFile(dto *model.FileRenameDTO) (*model.FileDTO, error)
 
-	GetFileById(fileId int64) (*model.FileDTO, error)
-	GetFileByFilename(filename string, folderId int64) (*model.FileDTO, error)
-	GetFilesInStorage(folderId int64) (*[]model.FileDTO, error)
+	GetFileById(dto *model.FileGetByIdDTO) (*model.FileDTO, error)
+	GetFileByFilename(dto *model.FileGetByNameDTO) (*model.FileDTO, error)
+	GetFilesInFolder(dto *model.FileGetAllDTO) (*[]model.FileDTO, error)
 }

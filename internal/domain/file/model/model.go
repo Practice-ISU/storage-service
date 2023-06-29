@@ -1,15 +1,36 @@
 package model
 
+import "fmt"
+
 type FileDTO struct {
 	Id       int64
 	FolderId int64
 	FileName string
-	Url      string
+}
+
+type FileBase64 struct {
+	Id       int64
+	FolderId int64
+	FileName string
+	Base64   string
+}
+
+type FilesZip struct {
+	FolderId int64
+	ZipName string
+	Data []byte
 }
 
 type FileAddDTO struct {
+	Base64   string
 	FolderId int64
 	FileName string
+	Format   string
+	Url      string
+}
+
+func (dto *FileAddDTO) ExtractInsertSQL() string {
+	return fmt.Sprintf(` (%d, '%s')`, dto.FolderId, dto.FileName)
 }
 
 type FileDeleteDTO struct {
@@ -18,7 +39,7 @@ type FileDeleteDTO struct {
 
 type FileDeleteResponceDTO struct {
 	Success bool
-	Mess string
+	Mess    string
 }
 
 type FileRenameDTO struct {
@@ -26,11 +47,16 @@ type FileRenameDTO struct {
 	NewFileName string
 }
 
-type FileGetDTO struct {
+type FileGetByIdDTO struct {
 	Id int64
+}
+
+type FileGetByNameDTO struct {
+	FileName string
+	FolderId int64
 }
 
 type FileGetAllDTO struct {
-	Id int64
+	FolderId int64
+	// UserId   int64
 }
-
