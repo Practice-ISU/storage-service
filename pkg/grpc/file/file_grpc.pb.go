@@ -42,7 +42,7 @@ func NewFileServiceClient(cc grpc.ClientConnInterface) FileServiceClient {
 
 func (c *fileServiceClient) AddFile(ctx context.Context, in *FileAddDTO, opts ...grpc.CallOption) (*FileResponse, error) {
 	out := new(FileResponse)
-	err := c.cc.Invoke(ctx, "/fileservice.FileService/AddFile", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/file_service.FileService/AddFile", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -51,7 +51,7 @@ func (c *fileServiceClient) AddFile(ctx context.Context, in *FileAddDTO, opts ..
 
 func (c *fileServiceClient) DeleteFile(ctx context.Context, in *FileDeleteDTO, opts ...grpc.CallOption) (*Details, error) {
 	out := new(Details)
-	err := c.cc.Invoke(ctx, "/fileservice.FileService/DeleteFile", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/file_service.FileService/DeleteFile", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -60,7 +60,7 @@ func (c *fileServiceClient) DeleteFile(ctx context.Context, in *FileDeleteDTO, o
 
 func (c *fileServiceClient) RenameFile(ctx context.Context, in *FileRenameDTO, opts ...grpc.CallOption) (*FileResponse, error) {
 	out := new(FileResponse)
-	err := c.cc.Invoke(ctx, "/fileservice.FileService/RenameFile", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/file_service.FileService/RenameFile", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -69,7 +69,7 @@ func (c *fileServiceClient) RenameFile(ctx context.Context, in *FileRenameDTO, o
 
 func (c *fileServiceClient) GetFile(ctx context.Context, in *FileGetDTO, opts ...grpc.CallOption) (*FileResponse, error) {
 	out := new(FileResponse)
-	err := c.cc.Invoke(ctx, "/fileservice.FileService/GetFile", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/file_service.FileService/GetFile", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -78,7 +78,7 @@ func (c *fileServiceClient) GetFile(ctx context.Context, in *FileGetDTO, opts ..
 
 func (c *fileServiceClient) GetAllFilesInFolder(ctx context.Context, in *FileGetAllDTO, opts ...grpc.CallOption) (*FileAllResponse, error) {
 	out := new(FileAllResponse)
-	err := c.cc.Invoke(ctx, "/fileservice.FileService/GetAllFilesInFolder", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/file_service.FileService/GetAllFilesInFolder", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -87,7 +87,7 @@ func (c *fileServiceClient) GetAllFilesInFolder(ctx context.Context, in *FileGet
 
 func (c *fileServiceClient) GetFileBase64(ctx context.Context, in *FileGetDTO, opts ...grpc.CallOption) (*FileBase64Response, error) {
 	out := new(FileBase64Response)
-	err := c.cc.Invoke(ctx, "/fileservice.FileService/GetFileBase64", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/file_service.FileService/GetFileBase64", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -96,7 +96,7 @@ func (c *fileServiceClient) GetFileBase64(ctx context.Context, in *FileGetDTO, o
 
 func (c *fileServiceClient) GetAllFilesInFolderBase64(ctx context.Context, in *FileGetAllDTO, opts ...grpc.CallOption) (*FileAllBase64Response, error) {
 	out := new(FileAllBase64Response)
-	err := c.cc.Invoke(ctx, "/fileservice.FileService/GetAllFilesInFolderBase64", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/file_service.FileService/GetAllFilesInFolderBase64", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -105,7 +105,7 @@ func (c *fileServiceClient) GetAllFilesInFolderBase64(ctx context.Context, in *F
 
 func (c *fileServiceClient) GetAllFilesInFolderZip(ctx context.Context, in *FileGetAllDTO, opts ...grpc.CallOption) (*FileAllZipResponse, error) {
 	out := new(FileAllZipResponse)
-	err := c.cc.Invoke(ctx, "/fileservice.FileService/GetAllFilesInFolderZip", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/file_service.FileService/GetAllFilesInFolderZip", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -178,7 +178,7 @@ func _FileService_AddFile_Handler(srv interface{}, ctx context.Context, dec func
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/fileservice.FileService/AddFile",
+		FullMethod: "/file_service.FileService/AddFile",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(FileServiceServer).AddFile(ctx, req.(*FileAddDTO))
@@ -196,7 +196,7 @@ func _FileService_DeleteFile_Handler(srv interface{}, ctx context.Context, dec f
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/fileservice.FileService/DeleteFile",
+		FullMethod: "/file_service.FileService/DeleteFile",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(FileServiceServer).DeleteFile(ctx, req.(*FileDeleteDTO))
@@ -214,7 +214,7 @@ func _FileService_RenameFile_Handler(srv interface{}, ctx context.Context, dec f
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/fileservice.FileService/RenameFile",
+		FullMethod: "/file_service.FileService/RenameFile",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(FileServiceServer).RenameFile(ctx, req.(*FileRenameDTO))
@@ -232,7 +232,7 @@ func _FileService_GetFile_Handler(srv interface{}, ctx context.Context, dec func
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/fileservice.FileService/GetFile",
+		FullMethod: "/file_service.FileService/GetFile",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(FileServiceServer).GetFile(ctx, req.(*FileGetDTO))
@@ -250,7 +250,7 @@ func _FileService_GetAllFilesInFolder_Handler(srv interface{}, ctx context.Conte
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/fileservice.FileService/GetAllFilesInFolder",
+		FullMethod: "/file_service.FileService/GetAllFilesInFolder",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(FileServiceServer).GetAllFilesInFolder(ctx, req.(*FileGetAllDTO))
@@ -268,7 +268,7 @@ func _FileService_GetFileBase64_Handler(srv interface{}, ctx context.Context, de
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/fileservice.FileService/GetFileBase64",
+		FullMethod: "/file_service.FileService/GetFileBase64",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(FileServiceServer).GetFileBase64(ctx, req.(*FileGetDTO))
@@ -286,7 +286,7 @@ func _FileService_GetAllFilesInFolderBase64_Handler(srv interface{}, ctx context
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/fileservice.FileService/GetAllFilesInFolderBase64",
+		FullMethod: "/file_service.FileService/GetAllFilesInFolderBase64",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(FileServiceServer).GetAllFilesInFolderBase64(ctx, req.(*FileGetAllDTO))
@@ -304,7 +304,7 @@ func _FileService_GetAllFilesInFolderZip_Handler(srv interface{}, ctx context.Co
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/fileservice.FileService/GetAllFilesInFolderZip",
+		FullMethod: "/file_service.FileService/GetAllFilesInFolderZip",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(FileServiceServer).GetAllFilesInFolderZip(ctx, req.(*FileGetAllDTO))
@@ -316,7 +316,7 @@ func _FileService_GetAllFilesInFolderZip_Handler(srv interface{}, ctx context.Co
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var FileService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "fileservice.FileService",
+	ServiceName: "file_service.FileService",
 	HandlerType: (*FileServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
