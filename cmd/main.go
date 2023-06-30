@@ -35,7 +35,7 @@ func main() {
 	fileStorage := file_stor.NewFileStorage(psqlCnf)
 
 	folderService := folder_service.NewFolderService(folderStorage, mainCnf)
-	fileService := file_service.NewFileService(fileStorage, folderService)
+	fileService := file_service.NewFileService(fileStorage, folderService, mainCnf)
 	folderServer := folder_server.NewFolderGrpcServer(folderService)
 	fileServer := file_server.NewFileGrpcServer(fileService, mainCnf)
 
@@ -94,8 +94,8 @@ func main() {
 		fs := http.FileServer(http.Dir(mainCnf.GetStorageFolder()))
 		http.Handle("/storage/", http.StripPrefix("/storage/", fs))
 
-		log.Println("Static server is working on: localhost:80" + mainCnf.GetStorageFolder())
-		err := http.ListenAndServe(":80", nil)
+		log.Println("Static server is working on: localhost:" + mainCnf.GetStoragePort() + mainCnf.GetStorageFolder())
+		err := http.ListenAndServe(":"+mainCnf.GetStoragePort(), nil)
 		if err != nil {
 			log.Fatal(err)
 		}
