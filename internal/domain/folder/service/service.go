@@ -7,26 +7,29 @@ import (
 	"storage-service/internal/domain/folder/storage"
 )
 
-const (
-	storageRoot = "./storage"
-)
+type config interface {
+	GetStorageFolder() string
+}
+
 
 type folderService struct {
 	storage storage.FolderStorage
+	storageRoot string
 }
 
-func NewFolderService(storage storage.FolderStorage) *folderService {
+func NewFolderService(storage storage.FolderStorage, cnf config) *folderService {
 	return &folderService{
 		storage: storage,
+		storageRoot: cnf.GetStorageFolder(),
 	}
 }
 
-func getUserRoot(userId int64) string {
-	return fmt.Sprintf("%s/user_%d/", storageRoot, userId)
+func (s *folderService) getUserRoot(userId int64) string {
+	return fmt.Sprintf("%s/user_%d/", s.storageRoot, userId)
 }
 
 func (s *folderService) ensureUserRootFolder(userId int64) (string, error) {
-	folderName := getUserRoot(userId)
+	folderName := s.getUserRoot(userId)
 	if _, err := os.Stat(folderName); os.IsNotExist(err) {
 		err = os.Mkdir(folderName, 0666)
 		if err != nil {
@@ -63,7 +66,7 @@ func (s *folderService) DeleteFolder(dto *model.FolderDeleteDTO) (*model.FolderD
 		return nil, err
 	}
 
-	root := getUserRoot(dto.UserId)
+	root := s.getUserRoot(dto.UserId)
 	err = os.RemoveAll(root + result.FolderName)
 	if err != nil {
 		return nil, err
@@ -80,7 +83,7 @@ func (s *folderService) RenameFolder(dto *model.FolderRenameDTO) (*model.FolderD
 		return nil, err
 	}
 
-	root := getUserRoot(dto.UserId)
+	root := s.getUserRoot(dto.UserId)
 	err = os.Rename(root+result.FolderName, root+dto.NewName)
 	if err != nil {
 		return nil, err
@@ -93,7 +96,7 @@ func (s *folderService) GetUrl(dto *model.FolderGetByIdDTO) (string, error) {
 	if err != nil {
 		return "", nil
 	}
-	url := getUserRoot(folder.UserId)
+	url := s.getUserRoot(folder.UserId)
 	return url + folder.FolderName + "/", nil
 }
 
