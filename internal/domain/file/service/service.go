@@ -69,7 +69,12 @@ func (s *fileService) AddFile(dto *model.FileAddDTO) (*model.FileDTO, error) {
 	if !flag {
 		return nil, fmt.Errorf("something hapend")
 	}
-	return s.storage.AddFile(dto)
+	file, err := s.storage.AddFile(dto)
+	if err != nil {
+		return nil, err
+	}
+	file.Url = folderUrl + file.FileName
+	return file, nil
 }
 func (s *fileService) DeleteFile(dto *model.FileDeleteDTO) (*model.FileDeleteResponceDTO, error) {
 	result, _ := s.GetFileById(&model.FileGetByIdDTO{Id: dto.Id})
@@ -130,10 +135,34 @@ func (s *fileService) RenameFile(dto *model.FileRenameDTO) (*model.FileDTO, erro
 }
 
 func (s *fileService) GetFileById(dto *model.FileGetByIdDTO) (*model.FileDTO, error) {
-	return s.storage.GetFileById(dto)
+	file, err := s.storage.GetFileById(dto)
+	if err != nil {
+		return nil, err
+	}
+	folderUrl, err := s.folderService.GetUrl(&folder_model.FolderGetByIdDTO{Id: file.FolderId})
+	if folderUrl == "" {
+		return nil, fmt.Errorf("no such folder")
+	}
+	if err != nil {
+		return nil, err
+	}
+	file.Url = folderUrl + file.FileName
+	return file, nil
 }
 func (s *fileService) GetFileByFilename(dto *model.FileGetByNameDTO) (*model.FileDTO, error) {
-	return s.storage.GetFileByFilename(dto)
+	file, err := s.storage.GetFileByFilename(dto)
+	if err != nil {
+		return nil, err
+	}
+	folderUrl, err := s.folderService.GetUrl(&folder_model.FolderGetByIdDTO{Id: dto.FolderId})
+	if folderUrl == "" {
+		return nil, fmt.Errorf("no such folder")
+	}
+	if err != nil {
+		return nil, err
+	}
+	file.Url = folderUrl + file.FileName
+	return file, nil
 }
 func (s *fileService) GetFilesInFolder(dto *model.FileGetAllDTO) (*[]model.FileDTO, error) {
 	return s.storage.GetFilesInFolder(dto)
@@ -229,22 +258,22 @@ func (s *fileService) GetFilesInFolderZip(dto *model.FileGetAllDTO) (*model.File
 
 	for _, fileName := range fileNames {
 		fw, err := archive.Create(fileName)
-        if err != nil {
-            return nil, err
-        }
+		if err != nil {
+			return nil, err
+		}
 		data, err := ioutil.ReadFile(folderUrl + fileName)
 		if err != nil {
 			return nil, err
 		}
-        _, err = fw.Write(data)
-        if err != nil {
-            return nil, err
-        }
+		_, err = fw.Write(data)
+		if err != nil {
+			return nil, err
+		}
 	}
 	err = archive.Close()
-    if err != nil {
+	if err != nil {
 		return nil, err
-    }
+	}
 
 	if err != nil {
 		return nil, err

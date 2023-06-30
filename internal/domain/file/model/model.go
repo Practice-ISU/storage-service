@@ -6,6 +6,7 @@ type FileDTO struct {
 	Id       int64
 	FolderId int64
 	FileName string
+	Url      string
 }
 
 type FileBase64 struct {
@@ -17,8 +18,8 @@ type FileBase64 struct {
 
 type FilesZip struct {
 	FolderId int64
-	ZipName string
-	Data []byte
+	ZipName  string
+	Data     []byte
 }
 
 type FileAddDTO struct {
