@@ -9,6 +9,7 @@ type mainConfig struct {
 	folderServiceName string
 	fileServiceName   string
 	storageFolder     string
+	storagePort       string
 }
 
 func GetMainConfig() *mainConfig {
@@ -19,6 +20,7 @@ func GetMainConfig() *mainConfig {
 		folderServiceName: "FolderGrpcService",
 		fileServiceName:   "FileGrpcService",
 		storageFolder:     "./storage",
+		storagePort:       "9000",
 	}
 	ip := os.Getenv("SERVICE_IP")
 	if ip != "" {
@@ -43,6 +45,10 @@ func GetMainConfig() *mainConfig {
 	storageFolder := os.Getenv("STORAGE_FOLDER")
 	if ip != "" {
 		conf.storageFolder = storageFolder
+	}
+	storagePort := os.Getenv("STORAGE_PORT")
+	if storageFolder != "" {
+		conf.storagePort = storagePort
 	}
 	return conf
 }
@@ -69,4 +75,8 @@ func (cnf *mainConfig) GetFileServiceName() string {
 
 func (cnf *mainConfig) GetStorageFolder() string {
 	return cnf.storageFolder
+}
+
+func (cnf *mainConfig) GetStoragePort() string {
+	return cnf.storagePort
 }
