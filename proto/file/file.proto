@@ -8,6 +8,7 @@ message FileDTO {
 	int64 id = 1;
 	string filename = 2;
 	int64 folder_id = 3;
+	string url = 5;
 }
 
 message FileAddDTO {
