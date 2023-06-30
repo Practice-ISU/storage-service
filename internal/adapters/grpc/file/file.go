@@ -7,14 +7,20 @@ import (
 	file_grpc "storage-service/pkg/grpc/file"
 )
 
+type config interface {
+	GetIp() string
+}
+
 type fileGrpcServer struct {
 	file_grpc.UnimplementedFileServiceServer
 	service file_service.FileService
+	ip string
 }
 
-func NewFileGrpcServer(service file_service.FileService) *fileGrpcServer {
+func NewFileGrpcServer(service file_service.FileService, cnf config) *fileGrpcServer {
 	return &fileGrpcServer{
 		service: service,
+		ip: cnf.GetIp(),
 	}
 }
 
@@ -45,6 +51,7 @@ func (server *fileGrpcServer) AddFile(ctx context.Context, dto *file_grpc.FileAd
 			Id:       result.Id,
 			FolderId: result.FolderId,
 			Filename: result.FileName,
+			Url: "http://" + server.ip + result.Url,
 		},
 	}, nil
 }
@@ -86,6 +93,7 @@ func (server *fileGrpcServer) RenameFile(ctx context.Context, dto *file_grpc.Fil
 			Id:       result.Id,
 			FolderId: result.FolderId,
 			Filename: result.FileName,
+			Url: "http://" + server.ip + result.Url,
 		},
 	}, nil
 }
@@ -107,6 +115,7 @@ func (server *fileGrpcServer) GetAllFilesInFolder(ctx context.Context, dto *file
 			Id:       file.Id,
 			FolderId: file.FolderId,
 			Filename: file.FileName,
+			Url: "http://" + server.ip + file.Url,
 		}
 	}
 	return &file_grpc.FileAllResponse{
@@ -139,6 +148,7 @@ func (server *fileGrpcServer) GetFile(ctx context.Context, dto *file_grpc.FileGe
 			Id:       result.Id,
 			FolderId: result.FolderId,
 			Filename: result.FileName,
+			Url: "http://" + server.ip + result.Url,
 		},
 	}, nil
 }
