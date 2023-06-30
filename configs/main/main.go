@@ -3,20 +3,22 @@ package mainconfig
 import "os"
 
 type mainConfig struct {
-	ipAddr      string
-	filePort    string
-	folderPort  string
+	ipAddr            string
+	filePort          string
+	folderPort        string
 	folderServiceName string
-	fileServiceName string
+	fileServiceName   string
+	storageFolder     string
 }
 
 func GetMainConfig() *mainConfig {
 	conf := &mainConfig{
-		ipAddr:      "127.0.0.1",
-		filePort:    "8080",
-		folderPort:  "8000",
+		ipAddr:            "127.0.0.1",
+		filePort:          "8080",
+		folderPort:        "8000",
 		folderServiceName: "FolderGrpcService",
-		fileServiceName: "FileGrpcService",
+		fileServiceName:   "FileGrpcService",
+		storageFolder:     "./storage",
 	}
 	ip := os.Getenv("SERVICE_IP")
 	if ip != "" {
@@ -37,6 +39,10 @@ func GetMainConfig() *mainConfig {
 	fileServiceName := os.Getenv("FILE_SERVICE_NAME")
 	if ip != "" {
 		conf.fileServiceName = fileServiceName
+	}
+	storageFolder := os.Getenv("STORAGE_FOLDER")
+	if ip != "" {
+		conf.storageFolder = storageFolder
 	}
 	return conf
 }
@@ -59,4 +65,8 @@ func (cnf *mainConfig) GetFolderServiceName() string {
 
 func (cnf *mainConfig) GetFileServiceName() string {
 	return cnf.fileServiceName
+}
+
+func (cnf *mainConfig) GetStorageFolder() string {
+	return cnf.storageFolder
 }
