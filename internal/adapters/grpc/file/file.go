@@ -9,12 +9,14 @@ import (
 
 type config interface {
 	GetIp() string
+	GetStoragePort() string
 }
 
 type fileGrpcServer struct {
 	file_grpc.UnimplementedFileServiceServer
 	service file_service.FileService
 	ip string
+	storagePort string
 }
 
 func NewFileGrpcServer(service file_service.FileService, cnf config) *fileGrpcServer {
@@ -219,7 +221,7 @@ func (server *fileGrpcServer) GetAllFilesInFolderZip(ctx context.Context, dto *f
 				Mess:    err.Error(),
 			},
 			ZipName: "",
-			Zip:     []byte{},
+			Url: "",
 		}, nil
 	}
 
@@ -229,7 +231,7 @@ func (server *fileGrpcServer) GetAllFilesInFolderZip(ctx context.Context, dto *f
 			Mess:    "",
 		},
 		ZipName: result.ZipName,
-		Zip:     result.Data,
+		Url: "http://" + server.ip + ":" + server.storagePort + result.Url,
 	}, nil
 
 }
