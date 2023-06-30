@@ -26,6 +26,7 @@ services:
 
     environment:
       STORAGE_FOLDER: "/storage"
+      STORAGE_PORT: "80"
       DISCOVERY_ADDR: 158.160.26.1:80
       SERVICE_IP: 84.201.139.249
       POSTGRES_HOST: db-psql
