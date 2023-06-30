@@ -15,6 +15,10 @@ import (
 	folder_model "storage-service/internal/domain/folder/model"
 )
 
+type config interface {
+	GetStorageFolder() string
+}
+
 func saveImg(url, base64Str string) (bool, error) {
 	bts, err := base64.StdEncoding.DecodeString(base64Str)
 
@@ -32,12 +36,14 @@ func saveImg(url, base64Str string) (bool, error) {
 type fileService struct {
 	storage       storage.FileStorage
 	folderService FolderService
+	storageFolder string
 }
 
-func NewFileService(storage storage.FileStorage, folderfileService FolderService) *fileService {
+func NewFileService(storage storage.FileStorage, folderfileService FolderService, cnf config) *fileService {
 	return &fileService{
 		storage:       storage,
 		folderService: folderfileService,
+		storageFolder: cnf.GetStorageFolder(),
 	}
 }
 
@@ -137,7 +143,7 @@ func (s *fileService) RenameFile(dto *model.FileRenameDTO) (*model.FileDTO, erro
 func (s *fileService) GetFileById(dto *model.FileGetByIdDTO) (*model.FileDTO, error) {
 	file, err := s.storage.GetFileById(dto)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("no such file")
 	}
 	folderUrl, err := s.folderService.GetUrl(&folder_model.FolderGetByIdDTO{Id: file.FolderId})
 	if folderUrl == "" {
@@ -152,7 +158,7 @@ func (s *fileService) GetFileById(dto *model.FileGetByIdDTO) (*model.FileDTO, er
 func (s *fileService) GetFileByFilename(dto *model.FileGetByNameDTO) (*model.FileDTO, error) {
 	file, err := s.storage.GetFileByFilename(dto)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("no such file")
 	}
 	folderUrl, err := s.folderService.GetUrl(&folder_model.FolderGetByIdDTO{Id: dto.FolderId})
 	if folderUrl == "" {
@@ -165,7 +171,19 @@ func (s *fileService) GetFileByFilename(dto *model.FileGetByNameDTO) (*model.Fil
 	return file, nil
 }
 func (s *fileService) GetFilesInFolder(dto *model.FileGetAllDTO) (*[]model.FileDTO, error) {
-	return s.storage.GetFilesInFolder(dto)
+	files, err := s.storage.GetFilesInFolder(dto)
+	if err != nil {
+		return nil, fmt.Errorf("no such folder")
+	}
+	folderUrl, err := s.folderService.GetUrl(&folder_model.FolderGetByIdDTO{Id: dto.FolderId})
+	if folderUrl == "" {
+		return nil, fmt.Errorf("no such folder")
+	}
+
+	for i := range *files {
+		(*files)[i].Url = folderUrl + (*files)[i].FileName
+	}
+	return files, nil
 }
 
 func (s *fileService) GetFileBase64(dto *model.FileGetByIdDTO) (*model.FileBase64, error) {
@@ -279,9 +297,16 @@ func (s *fileService) GetFilesInFolderZip(dto *model.FileGetAllDTO) (*model.File
 		return nil, err
 	}
 
+	file, err := os.Create(folderUrl + folder.FolderName + ".zip")
+	if err != nil {
+		return nil, err
+	}
+	_, err = file.Write(buf.Bytes())
+	if err != nil {
+		return nil, err
+	}
 	return &model.FilesZip{
-		FolderId: folder.Id,
-		ZipName:  folder.FolderName + ".zip",
-		Data:     buf.Bytes(),
+		ZipName: folder.FolderName + ".zip",
+		Url:     folderUrl + folder.FolderName + ".zip",
 	}, nil
 }

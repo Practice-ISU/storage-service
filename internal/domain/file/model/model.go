@@ -17,9 +17,8 @@ type FileBase64 struct {
 }
 
 type FilesZip struct {
-	FolderId int64
-	ZipName  string
-	Data     []byte
+	ZipName string
+	Url     string
 }
 
 type FileAddDTO struct {
