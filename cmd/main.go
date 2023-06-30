@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"net/http"
 	"time"
 
 	discovery_config "storage-service/configs/grpc/discovery"
@@ -33,10 +34,10 @@ func main() {
 	folderStorage := folder_stor.NewFileStorage(psqlCnf)
 	fileStorage := file_stor.NewFileStorage(psqlCnf)
 
-	folderService := folder_service.NewFolderService(folderStorage)
+	folderService := folder_service.NewFolderService(folderStorage, mainCnf)
 	fileService := file_service.NewFileService(fileStorage, folderService)
 	folderServer := folder_server.NewFolderGrpcServer(folderService)
-	fileServer := file_server.NewFileGrpcServer(fileService)
+	fileServer := file_server.NewFileGrpcServer(fileService, mainCnf)
 
 	pingServer, err := ping_server.NewDiscoveryPingServer(discoveryCnf, mainCnf)
 	if err != nil {
@@ -86,6 +87,17 @@ func main() {
 		for {
 			pingServer.StartTimeout(pingServer.SendRegistrationRequest)
 			time.Sleep(6 * time.Minute)
+		}
+	}()
+
+	go func() {
+		fs := http.FileServer(http.Dir(mainCnf.GetStorageFolder()))
+		http.Handle("/storage/", http.StripPrefix("/storage/", fs))
+
+		log.Println("Static server is working on: localhost:80" + mainCnf.GetStorageFolder())
+		err := http.ListenAndServe(":80", nil)
+		if err != nil {
+			log.Fatal(err)
 		}
 	}()
 
