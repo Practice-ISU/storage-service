@@ -14,7 +14,7 @@ services:
     volumes:
       - ./sql/init.sql:/docker-entrypoint-initdb.d/init.sql
     ports:
-      - ":5432"
+      - "54321:5432"
 
   storage-service:
     container_name: storage-service
@@ -25,6 +25,7 @@ services:
     mem_limit: 1g
 
     environment:
+      STORAGE_FOLDER: "/storage"
       DISCOVERY_ADDR: 158.160.26.1:80
       SERVICE_IP: 84.201.139.249
       POSTGRES_HOST: db-psql
@@ -48,6 +49,7 @@ services:
     ports:
       - "7010:7010"
       - "7000:7000"
-      - "7080:7080"
+      - "7080:7080" 
+      - "80:80" 
     depends_on:
       - db-psql
