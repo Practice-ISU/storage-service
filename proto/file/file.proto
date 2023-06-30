@@ -69,9 +69,8 @@ message FileAllBase64Response {
 
 message FileAllZipResponse {
 	Details details = 1;
-	int64 folder_id = 2;
 	string zip_name = 3;
-	bytes zip = 4;
+	string url = 4;
 }
 
 service FileService {
