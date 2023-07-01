@@ -14,15 +14,15 @@ type config interface {
 
 type fileGrpcServer struct {
 	file_grpc.UnimplementedFileServiceServer
-	service file_service.FileService
-	ip string
+	service     file_service.FileService
+	ip          string
 	storagePort string
 }
 
 func NewFileGrpcServer(service file_service.FileService, cnf config) *fileGrpcServer {
 	return &fileGrpcServer{
 		service: service,
-		ip: cnf.GetIp(),
+		ip:      cnf.GetIp(),
 	}
 }
 
@@ -53,7 +53,7 @@ func (server *fileGrpcServer) AddFile(ctx context.Context, dto *file_grpc.FileAd
 			Id:       result.Id,
 			FolderId: result.FolderId,
 			Filename: result.FileName,
-			Url: "http://" + server.ip + result.Url,
+			Url:      "http://" + server.ip + result.Url,
 		},
 	}, nil
 }
@@ -95,7 +95,7 @@ func (server *fileGrpcServer) RenameFile(ctx context.Context, dto *file_grpc.Fil
 			Id:       result.Id,
 			FolderId: result.FolderId,
 			Filename: result.FileName,
-			Url: "http://" + server.ip + result.Url,
+			Url:      "http://" + server.ip + result.Url,
 		},
 	}, nil
 }
@@ -117,7 +117,7 @@ func (server *fileGrpcServer) GetAllFilesInFolder(ctx context.Context, dto *file
 			Id:       file.Id,
 			FolderId: file.FolderId,
 			Filename: file.FileName,
-			Url: "http://" + server.ip + file.Url,
+			Url:      "http://" + server.ip + file.Url,
 		}
 	}
 	return &file_grpc.FileAllResponse{
@@ -150,7 +150,7 @@ func (server *fileGrpcServer) GetFile(ctx context.Context, dto *file_grpc.FileGe
 			Id:       result.Id,
 			FolderId: result.FolderId,
 			Filename: result.FileName,
-			Url: "http://" + server.ip + result.Url,
+			Url:      "http://" + server.ip + result.Url,
 		},
 	}, nil
 }
@@ -221,17 +221,17 @@ func (server *fileGrpcServer) GetAllFilesInFolderZip(ctx context.Context, dto *f
 				Mess:    err.Error(),
 			},
 			ZipName: "",
-			Url: "",
+			Url:     "",
 		}, nil
 	}
 
 	return &file_grpc.FileAllZipResponse{
 		Details: &file_grpc.Details{
-			Success: false,
+			Success: true,
 			Mess:    "",
 		},
 		ZipName: result.ZipName,
-		Url: "http://" + server.ip + ":" + server.storagePort + result.Url,
+		Url:     "http://" + server.ip + ":" + server.storagePort + result.Url,
 	}, nil
 
 }
