@@ -12,7 +12,6 @@ import (
 	psql_cnf "storage-service/configs/postgre"
 
 	"google.golang.org/grpc"
-	"github.com/rs/cors"
 
 	file_stor "storage-service/internal/adapters/db/file"
 	folder_stor "storage-service/internal/adapters/db/folder"
@@ -26,6 +25,24 @@ import (
 	ping_server "storage-service/pkg/api/grpc/ping"
 	ping_grpc "storage-service/pkg/grpc/discovery/ping"
 )
+
+func enableCors(w *http.ResponseWriter) {
+	(*w).Header().Set("Access-Control-Allow-Origin", "*")
+	(*w).Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+	(*w).Header().Set("Access-Control-Allow-Headers", "Content-Type")
+}
+
+func fileServerWithCors(dir string) http.Handler {
+	fs := http.FileServer(http.Dir(dir))
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		enableCors(&w)
+		if r.Method == "OPTIONS" {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+		fs.ServeHTTP(w, r)
+	})
+}
 
 func main() {
 	psqlCnf := psql_cnf.GetConfig()
@@ -92,21 +109,23 @@ func main() {
 	}()
 
 	go func() {
-		fs := http.FileServer(http.Dir(mainCnf.GetStorageFolder()))
-		http.Handle("/storage/", http.StripPrefix("/storage/", fs))
+		// fs := http.FileServer(http.Dir())
+		// http.Handle("/storage/", http.StripPrefix("/storage/", fs))
 
-		c := cors.New(cors.Options{
-			AllowedOrigins: []string{"*"},
-			AllowedMethods: []string{"*"},
-			AllowedHeaders: []string{"*"},
-		})
+		// c := cors.New(cors.Options{
+		// 	AllowedOrigins: []string{"*"},
+		// 	AllowedMethods: []string{"*"},
+		// 	AllowedHeaders: []string{"*"},
+		// })
 
-		handler := c.Handler(http.DefaultServeMux)
+		// handler := c.Handler(http.DefaultServeMux)
 
 		log.Println("Static server is working on: localhost:" + mainCnf.GetStoragePort() + mainCnf.GetStorageFolder())
-		err := http.ListenAndServe(":"+mainCnf.GetStoragePort(), handler)
+
+		http.Handle("/", fileServerWithCors(mainCnf.GetStorageFolder()))
+		err = http.ListenAndServe(":"+mainCnf.GetStoragePort(), nil)
 		if err != nil {
-			log.Fatal(err)
+			panic(err)
 		}
 	}()
 
