@@ -122,7 +122,7 @@ func main() {
 
 		log.Println("Static server is working on: localhost:" + mainCnf.GetStoragePort() + mainCnf.GetStorageFolder())
 
-		http.Handle("/", fileServerWithCors(mainCnf.GetStorageFolder()))
+		http.Handle("/storage/", http.StripPrefix("/storage/", fileServerWithCors(mainCnf.GetStorageFolder())))
 		err = http.ListenAndServe(":"+mainCnf.GetStoragePort(), nil)
 		if err != nil {
 			panic(err)
