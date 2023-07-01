@@ -12,6 +12,7 @@ import (
 	psql_cnf "storage-service/configs/postgre"
 
 	"google.golang.org/grpc"
+	"github.com/rs/cors"
 
 	file_stor "storage-service/internal/adapters/db/file"
 	folder_stor "storage-service/internal/adapters/db/folder"
@@ -94,8 +95,16 @@ func main() {
 		fs := http.FileServer(http.Dir(mainCnf.GetStorageFolder()))
 		http.Handle("/storage/", http.StripPrefix("/storage/", fs))
 
+		c := cors.New(cors.Options{
+			AllowedOrigins: []string{"*"},
+			AllowedMethods: []string{"*"},
+			AllowedHeaders: []string{"*"},
+		})
+
+		handler := c.Handler(http.DefaultServeMux)
+
 		log.Println("Static server is working on: localhost:" + mainCnf.GetStoragePort() + mainCnf.GetStorageFolder())
-		err := http.ListenAndServe(":"+mainCnf.GetStoragePort(), nil)
+		err := http.ListenAndServe(":"+mainCnf.GetStoragePort(), handler)
 		if err != nil {
 			log.Fatal(err)
 		}
