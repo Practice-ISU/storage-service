@@ -48,6 +48,10 @@ func main() {
 	psqlCnf := psql_cnf.GetConfig()
 	mainCnf := main_config.GetMainConfig()
 	discoveryCnf := discovery_config.GetConfig()
+	serverOptions := []grpc.ServerOption{
+		grpc.MaxRecvMsgSize(1024 * 1024 * 1024),
+		grpc.MaxSendMsgSize(1024 * 1024 * 1024),
+	}
 
 	folderStorage := folder_stor.NewFileStorage(psqlCnf)
 	fileStorage := file_stor.NewFileStorage(psqlCnf)
@@ -57,12 +61,14 @@ func main() {
 	folderServer := folder_server.NewFolderGrpcServer(folderService)
 	fileServer := file_server.NewFileGrpcServer(fileService, mainCnf)
 
+
+
 	pingServer, err := ping_server.NewDiscoveryPingServer(discoveryCnf, mainCnf)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	s := grpc.NewServer()
+	s := grpc.NewServer(serverOptions...)
 	folder_grpc.RegisterFolderServiceServer(s, folderServer)
 	file_grpc.RegisterFileServiceServer(s, fileServer)
 	ping_grpc.RegisterDiscoveryPingServer(s, pingServer)
