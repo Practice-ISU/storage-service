@@ -51,6 +51,14 @@ services:
       - "7010:7010"
       - "7000:7000"
       - "7080:7080" 
-      - "80:80" 
+      - "80:80"
+
+    volumes:
+      - storage-voluem:/storage
+      
     depends_on:
       - db-psql
+
+volumes:
+  storage-voluem:
+    create_host_path: true
