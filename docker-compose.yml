@@ -55,10 +55,9 @@ services:
 
     volumes:
       - storage-voluem:/storage
-      
+
     depends_on:
       - db-psql
 
 volumes:
   storage-voluem:
-    create_host_path: true
