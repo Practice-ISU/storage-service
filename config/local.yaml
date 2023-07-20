@@ -1,0 +1,22 @@
+env: "local" # dev, prod
+storage_path: "./storage"
+host: "localhost"
+grpc_servers:
+  file_server:
+    port: "8000"
+  folder_server:
+    port: "8010"
+  ping_server:
+    port: "8020"
+http_servers:
+  storage_server:
+    port: "8030"
+    timeout: 4s
+    idle_timeout: 60s
+postgres:
+  host: "localhost"
+  port: "5432"
+  user: "storage-user"
+  database: "storage_database"
+  password: "qwer"
+  ssl_mode: "disable"
